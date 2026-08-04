@@ -73,17 +73,22 @@ export function createHandLandmarkerController(): HandLandmarkerController {
     status = 'loading';
 
     try {
-      const modelResponse = await fetch(TOUCHLESS_CONFIG.modelPath, { method: 'HEAD' });
+      const modelResponse = await fetch(TOUCHLESS_CONFIG.modelPath);
       if (!modelResponse.ok) {
         throw new Error(
           'Model MediaPipe chưa được tải. Hãy đặt file hand_landmarker.task vào public/models/.',
         );
       }
 
-      try {
-        landmarker = await createWithDelegate('GPU');
-      } catch {
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isIOS) {
         landmarker = await createWithDelegate('CPU');
+      } else {
+        try {
+          landmarker = await createWithDelegate('GPU');
+        } catch {
+          landmarker = await createWithDelegate('CPU');
+        }
       }
 
       status = 'ready';

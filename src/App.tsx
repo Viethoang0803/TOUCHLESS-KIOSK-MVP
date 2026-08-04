@@ -14,8 +14,13 @@ import { CatalogScreen } from './screens/CatalogScreen';
 import { ProductDetailScreen } from './screens/ProductDetailScreen';
 import { ContactScreen } from './screens/ContactScreen';
 import { TargetTestScreen } from './screens/TargetTestScreen';
+import { MobileStartGate } from './components/MobileStartGate';
 import { playSelectionSound, flashTarget } from './utils/feedback';
 import styles from './App.module.css';
+
+function needsTapToStart(): boolean {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
 
 function getInitialScreen(): AppScreen {
   if (window.location.pathname === '/test') return 'test';
@@ -29,6 +34,7 @@ export default function App() {
   const [debugOpen, setDebugOpen] = useState(false);
   const [debugSettings, setDebugSettings] = useState<DebugSettings>(loadDebugSettings);
   const [cameraError, setCameraError] = useState<string | undefined>();
+  const [started, setStarted] = useState(!needsTapToStart());
 
   const sessionRef = useRef<SessionManager | null>(null);
   const testHandlersRef = useRef<{
@@ -70,7 +76,7 @@ export default function App() {
     modelError,
     retryCamera,
     getVideoElement,
-  } = useHandTracking(true);
+  } = useHandTracking(started);
 
   const resolveTargetAction = useCallback(
     (targetId: string): (() => void) | null => {
@@ -254,6 +260,8 @@ export default function App() {
 
   return (
     <div className={styles.app}>
+      {!started && <MobileStartGate onStart={() => setStarted(true)} />}
+
       {(modelError || cameraError) && (
         <div className={styles.errorBanner}>
           <p>{modelError ?? cameraError}</p>

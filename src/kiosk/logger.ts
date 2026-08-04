@@ -1,3 +1,5 @@
+import { generateId } from '../utils/id';
+
 export type InteractionEventType =
   | 'camera_started'
   | 'camera_error'
@@ -32,11 +34,11 @@ class InteractionLogger {
   private listeners = new Set<(logs: InteractionLog[]) => void>();
 
   constructor() {
-    this.sessionId = crypto.randomUUID();
+    this.sessionId = generateId();
   }
 
   newSession(): void {
-    this.sessionId = crypto.randomUUID();
+    this.sessionId = generateId();
     this.log('session_started');
   }
 
