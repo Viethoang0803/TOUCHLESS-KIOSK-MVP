@@ -1,0 +1,19 @@
+.ring {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.track {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.progress {
+  stroke: #f59e0b;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.05s linear;
+}

@@ -1,0 +1,32 @@
+.cursor {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  margin-top: -20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.normal {
+  background: rgba(0, 255, 136, 0.35);
+  border: 3px solid #00ff88;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
+}
+
+.hover {
+  background: rgba(59, 130, 246, 0.4);
+  border: 3px solid #3b82f6;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.6);
+}
+
+.dwell {
+  background: rgba(245, 158, 11, 0.4);
+  border: 3px solid #f59e0b;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.7);
+}
