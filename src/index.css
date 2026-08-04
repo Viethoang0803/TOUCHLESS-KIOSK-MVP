@@ -15,14 +15,24 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 button {
@@ -37,4 +47,10 @@ button {
   0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.8); }
   50% { box-shadow: 0 0 30px 10px rgba(0, 255, 136, 0.6); }
   100% { box-shadow: none; }
+}
+
+@media (max-width: 768px) {
+  body {
+    overscroll-behavior-y: contain;
+  }
 }

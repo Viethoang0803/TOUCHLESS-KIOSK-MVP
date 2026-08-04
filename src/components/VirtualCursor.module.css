@@ -1,5 +1,7 @@
 .cursor {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 40px;
   height: 40px;
   margin-left: -20px;
@@ -7,8 +9,8 @@
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
-  display: flex;
+  will-change: transform;
+  display: none;
   align-items: center;
   justify-content: center;
 }
@@ -29,4 +31,24 @@
   background: rgba(245, 158, 11, 0.4);
   border: 3px solid #f59e0b;
   box-shadow: 0 0 20px rgba(245, 158, 11, 0.7);
+}
+
+.ring {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.track {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.progress {
+  stroke: #f59e0b;
+  stroke-linecap: round;
+  opacity: 0;
 }

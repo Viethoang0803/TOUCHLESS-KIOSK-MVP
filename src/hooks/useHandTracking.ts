@@ -3,14 +3,7 @@ import { createCameraController } from '../vision/camera';
 import { createHandLandmarkerController } from '../vision/hand-landmarker';
 import type { CameraState, HandTrackingResult, VisionMetrics } from '../vision/vision-types';
 import { interactionLogger } from '../kiosk/logger';
-
-export interface HandTrackingState {
-  cameraState: CameraState;
-  trackingResult: HandTrackingResult | null;
-  metrics: VisionMetrics;
-  modelError: string | undefined;
-  modelStatus: string;
-}
+import { getDeviceInteractionOverrides } from '../config/device-config';
 
 const INITIAL_METRICS: VisionMetrics = {
   fps: 0,
@@ -24,16 +17,17 @@ export function useHandTracking(enabled: boolean) {
     status: 'idle',
     stream: null,
   });
-  const [trackingResult, setTrackingResult] = useState<HandTrackingResult | null>(null);
   const [metrics, setMetrics] = useState<VisionMetrics>(INITIAL_METRICS);
   const [modelError, setModelError] = useState<string | undefined>();
   const [modelStatus, setModelStatus] = useState('idle');
 
+  const trackingRef = useRef<HandTrackingResult | null>(null);
   const cameraRef = useRef(createCameraController());
   const landmarkerRef = useRef(createHandLandmarkerController());
   const rafRef = useRef<number | null>(null);
   const runningRef = useRef(false);
   const frameCountRef = useRef(0);
+  const inferenceFrameRef = useRef(0);
   const lastFpsTimeRef = useRef(performance.now());
   const handWasDetectedRef = useRef(false);
 
@@ -96,6 +90,7 @@ export function useHandTracking(enabled: boolean) {
       return;
     }
 
+    const { inferenceEveryNFrames = 1 } = getDeviceInteractionOverrides();
     runningRef.current = true;
 
     const loop = (timestamp: number) => {
@@ -103,20 +98,23 @@ export function useHandTracking(enabled: boolean) {
 
       const video = cameraRef.current.getVideoElement();
       if (video) {
-        const result = landmarkerRef.current.detect(video, timestamp);
+        inferenceFrameRef.current += 1;
+        let result: HandTrackingResult | null = trackingRef.current;
+
+        if (inferenceFrameRef.current % inferenceEveryNFrames === 0) {
+          result = landmarkerRef.current.detect(video, timestamp);
+          trackingRef.current = result;
+        }
 
         if (result) {
           if (!handWasDetectedRef.current) {
             interactionLogger.log('hand_detected', { confidence: result.confidence });
             handWasDetectedRef.current = true;
           }
-          setTrackingResult(result);
-        } else {
-          if (handWasDetectedRef.current) {
-            interactionLogger.log('hand_lost');
-            handWasDetectedRef.current = false;
-          }
-          setTrackingResult(null);
+        } else if (handWasDetectedRef.current) {
+          interactionLogger.log('hand_lost');
+          handWasDetectedRef.current = false;
+          trackingRef.current = null;
         }
 
         frameCountRef.current += 1;
@@ -151,11 +149,12 @@ export function useHandTracking(enabled: boolean) {
 
   return {
     cameraState,
-    trackingResult,
+    trackingRef,
     metrics,
     modelError,
     modelStatus,
     retryCamera,
     getVideoElement: () => cameraRef.current.getVideoElement(),
+    getTrackingResult: () => trackingRef.current,
   };
 }

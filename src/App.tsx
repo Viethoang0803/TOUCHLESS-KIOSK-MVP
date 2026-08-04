@@ -6,7 +6,7 @@ import { interactionLogger } from './kiosk/logger';
 import { useHandTracking } from './hooks/useHandTracking';
 import { useTouchlessInteraction } from './hooks/useTouchlessInteraction';
 import { useInactivityTimer } from './hooks/useInactivityTimer';
-import { VirtualCursor } from './components/VirtualCursor';
+import { VirtualCursor, type VirtualCursorHandle } from './components/VirtualCursor';
 import { CameraView } from './components/CameraView';
 import { DebugPanel, loadDebugSettings, type DebugSettings } from './components/DebugPanel';
 import { IdleScreen } from './screens/IdleScreen';
@@ -37,6 +37,8 @@ export default function App() {
   const [started, setStarted] = useState(!needsTapToStart());
 
   const sessionRef = useRef<SessionManager | null>(null);
+  const cursorRef = useRef<VirtualCursorHandle | null>(null);
+  const cursorEnabledRef = useRef(true);
   const testHandlersRef = useRef<{
     select: (num: number) => void;
     restart: () => void;
@@ -46,6 +48,7 @@ export default function App() {
   const selectedProductIdRef = useRef(selectedProductId);
   screenRef.current = screen;
   selectedProductIdRef.current = selectedProductId;
+  cursorEnabledRef.current = screen !== 'idle';
 
   const navigate = useCallback((next: AppScreen) => {
     setScreen(next);
@@ -71,11 +74,12 @@ export default function App() {
 
   const {
     cameraState,
-    trackingResult,
+    trackingRef,
     metrics,
     modelError,
     retryCamera,
     getVideoElement,
+    getTrackingResult,
   } = useHandTracking(started);
 
   const resolveTargetAction = useCallback(
@@ -143,7 +147,7 @@ export default function App() {
   );
 
   const { snapshot, resetEngine, updateEngineConfig, engineRef } =
-    useTouchlessInteraction(trackingResult, handleTargetSelect);
+    useTouchlessInteraction(trackingRef, handleTargetSelect, cursorRef, cursorEnabledRef);
 
   const { touchActivity } = useInactivityTimer(() => {
     sessionRef.current?.resetToIdle();
@@ -161,7 +165,7 @@ export default function App() {
   }, [debugSettings, updateEngineConfig]);
 
   useEffect(() => {
-    const handDetected = trackingResult !== null;
+    const handDetected = metrics.handDetected;
     sessionRef.current?.update(
       handDetected,
       snapshot.gesture === 'POINTING',
@@ -171,7 +175,7 @@ export default function App() {
     if (handDetected || snapshot.gesture === 'POINTING') {
       touchActivity();
     }
-  }, [trackingResult, snapshot.gesture, touchActivity]);
+  }, [metrics.handDetected, snapshot.gesture, touchActivity]);
 
   useEffect(() => {
     if (cameraState.status === 'error') {
@@ -275,17 +279,11 @@ export default function App() {
 
       {renderScreen()}
 
-      <VirtualCursor
-        x={snapshot.cursorX}
-        y={snapshot.cursorY}
-        visible={snapshot.visible && screen !== 'idle'}
-        state={snapshot.cursorState}
-        dwellProgress={snapshot.dwellProgress}
-      />
+      <VirtualCursor ref={cursorRef} />
 
       <CameraView
         videoElement={getVideoElement()}
-        trackingResult={trackingResult}
+        getTrackingResult={getTrackingResult}
         showOverlay={debugSettings.showLandmarkOverlay}
         visible={debugOpen && debugSettings.showCameraPreview}
       />

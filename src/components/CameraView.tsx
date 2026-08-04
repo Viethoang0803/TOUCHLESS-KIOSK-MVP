@@ -5,14 +5,14 @@ import styles from './CameraView.module.css';
 
 interface CameraViewProps {
   videoElement: HTMLVideoElement | null;
-  trackingResult: HandTrackingResult | null;
+  getTrackingResult: () => HandTrackingResult | null;
   showOverlay: boolean;
   visible: boolean;
 }
 
 export function CameraView({
   videoElement,
-  trackingResult,
+  getTrackingResult,
   showOverlay,
   visible,
 }: CameraViewProps) {
@@ -21,9 +21,8 @@ export function CameraView({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
     const videoEl = videoRef.current;
-    if (!container || !videoEl || !videoElement) return;
+    if (!videoEl || !videoElement) return;
 
     if (videoElement.srcObject && videoEl !== videoElement) {
       videoEl.srcObject = videoElement.srcObject;
@@ -32,18 +31,28 @@ export function CameraView({
   }, [videoElement]);
 
   useEffect(() => {
-    if (!showOverlay || !trackingResult || !canvasRef.current || !videoRef.current) return;
+    if (!showOverlay || !visible) return;
 
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    let rafId: number;
 
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    const draw = () => {
+      const trackingResult = getTrackingResult();
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      const ctx = canvas?.getContext('2d');
 
-    drawHandOverlay(ctx, trackingResult.landmarks, canvas.width, canvas.height);
-  }, [showOverlay, trackingResult]);
+      if (trackingResult && canvas && video && ctx) {
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        drawHandOverlay(ctx, trackingResult.landmarks, canvas.width, canvas.height);
+      }
+
+      rafId = requestAnimationFrame(draw);
+    };
+
+    rafId = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(rafId);
+  }, [showOverlay, visible, getTrackingResult]);
 
   if (!visible) return null;
 
