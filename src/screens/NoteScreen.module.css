@@ -1,0 +1,111 @@
+.screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #f1f5f9;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.noteArea {
+  min-height: 140px;
+  padding: 1rem 1.25rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  color: #e2e8f0;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.noteArea:empty::before {
+  content: 'Nội dung ghi chú sẽ hiển thị ở đây...';
+  color: #475569;
+}
+
+.savedBadge {
+  font-size: 0.85rem;
+  color: #22c55e;
+  min-height: 1.25rem;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.key {
+  min-width: 2.4rem !important;
+  min-height: 3rem !important;
+  padding: 0.5rem 0.65rem !important;
+  font-size: 1rem !important;
+  border-radius: 10px !important;
+}
+
+.keyWide {
+  min-width: 5rem !important;
+}
+
+.keyExtraWide {
+  min-width: 7rem !important;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 769px) {
+  .screen {
+    padding: 2rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .noteArea {
+    min-height: 180px;
+    font-size: 1.25rem;
+  }
+
+  .key {
+    min-width: 2.8rem !important;
+    min-height: 3.5rem !important;
+    font-size: 1.1rem !important;
+  }
+}

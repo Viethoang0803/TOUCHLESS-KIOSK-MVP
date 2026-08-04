@@ -13,6 +13,7 @@ import { IdleScreen } from './screens/IdleScreen';
 import { CatalogScreen } from './screens/CatalogScreen';
 import { ProductDetailScreen } from './screens/ProductDetailScreen';
 import { ContactScreen } from './screens/ContactScreen';
+import { NoteScreen, type NoteScreenHandlers } from './screens/NoteScreen';
 import { TargetTestScreen } from './screens/TargetTestScreen';
 import { MobileStartGate } from './components/MobileStartGate';
 import { ScrollAssist } from './components/ScrollAssist';
@@ -39,6 +40,7 @@ export default function App() {
   const [started, setStarted] = useState(!needsTapToStart());
 
   const sessionRef = useRef<SessionManager | null>(null);
+  const resetEngineRef = useRef<() => void>(() => {});
   const cursorRef = useRef<VirtualCursorHandle | null>(null);
   const cursorEnabledRef = useRef(true);
   const testHandlersRef = useRef<{
@@ -46,6 +48,7 @@ export default function App() {
     restart: () => void;
     download: () => void;
   } | null>(null);
+  const noteHandlersRef = useRef<NoteScreenHandlers | null>(null);
   const screenRef = useRef(screen);
   const selectedProductIdRef = useRef(selectedProductId);
   screenRef.current = screen;
@@ -58,6 +61,8 @@ export default function App() {
   }, []);
 
   const resetToIdle = useCallback(() => {
+    sessionRef.current?.resetToIdle();
+    resetEngineRef.current();
     setScreen('idle');
     setSelectedProductId(null);
     interactionLogger.log('screen_changed', { screen: 'idle' });
@@ -69,10 +74,9 @@ export default function App() {
     sessionRef.current = new SessionManager({
       onStateChange: setKioskState,
       onActivate: () => navigate('catalog'),
-      onResetToIdle: resetToIdle,
     });
     interactionLogger.newSession();
-  }, [navigate, resetToIdle]);
+  }, [navigate]);
 
   const {
     cameraState,
@@ -104,6 +108,10 @@ export default function App() {
         return null;
       }
 
+      if (targetId.startsWith('note-key-')) {
+        return () => noteHandlersRef.current?.pressKey(targetId);
+      }
+
       if (targetId === 'test-restart') {
         return () => testHandlersRef.current?.restart();
       }
@@ -113,12 +121,16 @@ export default function App() {
 
       const routes: Record<string, () => void> = {
         'catalog-home': resetToIdle,
+        'catalog-note': () => navigate('note'),
         'product-back': () => navigate('catalog'),
         'product-contact': () => navigate('contact'),
         'product-home': resetToIdle,
         'contact-back': () =>
           selectedProductIdRef.current ? navigate('product') : navigate('catalog'),
         'contact-home': resetToIdle,
+        'note-back': () => navigate('catalog'),
+        'note-home': resetToIdle,
+        'note-save': () => noteHandlersRef.current?.save(),
         'scroll-up': () => scrollPageUp(),
         'scroll-down': () => scrollPageDown(),
         'test-exit': () => {
@@ -153,10 +165,12 @@ export default function App() {
   const { snapshot, resetEngine, updateEngineConfig, engineRef } =
     useTouchlessInteraction(trackingRef, handleTargetSelect, cursorRef, cursorEnabledRef);
 
-  const { touchActivity } = useInactivityTimer(() => {
-    sessionRef.current?.resetToIdle();
-    resetEngine();
-  }, kioskState === 'ACTIVE' || kioskState === 'HAND_LOST');
+  resetEngineRef.current = resetEngine;
+
+  const { touchActivity } = useInactivityTimer(
+    resetToIdle,
+    kioskState === 'ACTIVE' || kioskState === 'HAND_LOST',
+  );
 
   touchActivityRef.current = touchActivity;
 
@@ -217,6 +231,7 @@ export default function App() {
               setSelectedProductId(id);
               navigate('product');
             }}
+            onOpenNote={() => navigate('note')}
             onGoHome={resetToIdle}
           />
         );
@@ -239,6 +254,16 @@ export default function App() {
             onBack={() =>
               selectedProductId ? navigate('product') : navigate('catalog')
             }
+            onGoHome={resetToIdle}
+          />
+        );
+      case 'note':
+        return (
+          <NoteScreen
+            onRegisterHandlers={(handlers) => {
+              noteHandlersRef.current = handlers;
+            }}
+            onBack={() => navigate('catalog')}
             onGoHome={resetToIdle}
           />
         );
@@ -304,10 +329,7 @@ export default function App() {
         snapshot={snapshot}
         metrics={metrics}
         onSettingsChange={setDebugSettings}
-        onResetInteraction={() => {
-          resetEngine();
-          sessionRef.current?.resetToIdle();
-        }}
+        onResetInteraction={resetToIdle}
         onOpenTest={() => {
           window.history.pushState({}, '', '/test');
           navigate('test');

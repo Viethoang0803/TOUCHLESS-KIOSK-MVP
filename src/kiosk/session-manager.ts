@@ -4,7 +4,6 @@ import type { KioskState } from './kiosk-state';
 export interface SessionManagerCallbacks {
   onStateChange: (state: KioskState) => void;
   onActivate: () => void;
-  onResetToIdle: () => void;
 }
 
 export class SessionManager {
@@ -71,7 +70,6 @@ export class SessionManager {
   resetToIdle(): void {
     this.pointingSince = null;
     this.setState('IDLE');
-    this.callbacks.onResetToIdle();
   }
 
   setError(): void {

@@ -4,10 +4,11 @@ import styles from './CatalogScreen.module.css';
 
 interface CatalogScreenProps {
   onSelectProduct: (productId: string) => void;
+  onOpenNote: () => void;
   onGoHome: () => void;
 }
 
-export function CatalogScreen({ onSelectProduct, onGoHome }: CatalogScreenProps) {
+export function CatalogScreen({ onSelectProduct, onOpenNote, onGoHome }: CatalogScreenProps) {
   return (
     <div className={styles.screen}>
       <header className={styles.header}>
@@ -15,14 +16,24 @@ export function CatalogScreen({ onSelectProduct, onGoHome }: CatalogScreenProps)
         <p className={styles.scrollHint}>
           Cuộn: đưa cursor gần mép trên/dưới, hoặc dùng nút ▲/▼ bên phải
         </p>
-        <TouchlessButton
-          targetId="catalog-home"
-          onSelect={onGoHome}
-          variant="ghost"
-          size="md"
-        >
-          Về trang chủ
-        </TouchlessButton>
+        <div className={styles.headerActions}>
+          <TouchlessButton
+            targetId="catalog-note"
+            onSelect={onOpenNote}
+            variant="secondary"
+            size="md"
+          >
+            Viết ghi chú
+          </TouchlessButton>
+          <TouchlessButton
+            targetId="catalog-home"
+            onSelect={onGoHome}
+            variant="ghost"
+            size="md"
+          >
+            Về trang chủ
+          </TouchlessButton>
+        </div>
       </header>
 
       <div className={styles.grid}>
