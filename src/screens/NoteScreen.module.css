@@ -89,6 +89,29 @@
   margin-top: 0.5rem;
 }
 
+.modeTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.modeBtn {
+  min-width: 10rem !important;
+}
+
+.airSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.airActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
 @media (min-width: 769px) {
   .screen {
     padding: 2rem;

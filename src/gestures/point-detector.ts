@@ -72,3 +72,20 @@ export function detectPointing(
 
   return indexExtended && middleFolded && ringFolded && pinkyFolded;
 }
+
+/** Detect closed fist: all fingers folded */
+export function detectFist(
+  landmarks: NormalizedLandmark[],
+  config: PointDetectorConfig = DEFAULT_CONFIG,
+): boolean {
+  if (landmarks.length < 21) return false;
+
+  const scale = handScale(landmarks);
+
+  const indexFolded = isFingerFolded(landmarks, 8, 6, scale, config.foldedRatio);
+  const middleFolded = isFingerFolded(landmarks, 12, 10, scale, config.foldedRatio);
+  const ringFolded = isFingerFolded(landmarks, 16, 14, scale, config.foldedRatio);
+  const pinkyFolded = isFingerFolded(landmarks, 20, 18, scale, config.foldedRatio);
+
+  return indexFolded && middleFolded && ringFolded && pinkyFolded;
+}

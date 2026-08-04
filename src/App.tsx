@@ -131,6 +131,9 @@ export default function App() {
         'note-back': () => navigate('catalog'),
         'note-home': resetToIdle,
         'note-save': () => noteHandlersRef.current?.save(),
+        'note-mode-air': () => noteHandlersRef.current?.setMode('air'),
+        'note-mode-keyboard': () => noteHandlersRef.current?.setMode('keyboard'),
+        'note-clear-pad': () => noteHandlersRef.current?.clearPad(),
         'scroll-up': () => scrollPageUp(),
         'scroll-down': () => scrollPageDown(),
         'test-exit': () => {
@@ -260,6 +263,7 @@ export default function App() {
       case 'note':
         return (
           <NoteScreen
+            trackingRef={trackingRef}
             onRegisterHandlers={(handlers) => {
               noteHandlersRef.current = handlers;
             }}
