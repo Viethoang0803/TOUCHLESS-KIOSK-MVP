@@ -13,54 +13,10 @@
         background: #0f172a;
         color: #e2e8f0;
       }
-      #boot-loader {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        font-family: system-ui, sans-serif;
-        color: #94a3b8;
-        text-align: center;
-        padding: 2rem;
-      }
-      #boot-error {
-        display: none;
-        padding: 2rem;
-        color: #fca5a5;
-        font-family: system-ui, sans-serif;
-        text-align: center;
-      }
     </style>
   </head>
   <body>
-    <div id="root">
-      <div id="boot-loader">
-        <p>Đang tải Touchless Kiosk...</p>
-        <p style="font-size:0.85rem;color:#64748b;margin-top:0.5rem">Vui lòng đợi vài giây</p>
-      </div>
-    </div>
-    <div id="boot-error"></div>
-    <script>
-      window.addEventListener('error', function (e) {
-        var el = document.getElementById('boot-error');
-        if (el) {
-          el.style.display = 'block';
-          el.innerHTML = '<h2>Không thể tải ứng dụng</h2><p>' + (e.message || 'Lỗi không xác định') + '</p><button onclick="location.reload()" style="margin-top:1rem;padding:0.75rem 1.5rem;font-size:1rem;background:#3b82f6;color:#fff;border:none;border-radius:8px">Thử lại</button>';
-        }
-      });
-      setTimeout(function () {
-        var root = document.getElementById('root');
-        var loader = document.getElementById('boot-loader');
-        if (loader && root && root.contains(loader)) {
-          var el = document.getElementById('boot-error');
-          if (el && el.style.display !== 'block') {
-            el.style.display = 'block';
-            el.innerHTML = '<h2>Tải quá lâu</h2><p>Kiểm tra kết nối mạng và thử lại. Cần internet lần đầu để tải thư viện AI.</p><button onclick="location.reload()" style="margin-top:1rem;padding:0.75rem 1.5rem;font-size:1rem;background:#3b82f6;color:#fff;border:none;border-radius:8px">Thử lại</button>';
-          }
-        }
-      }, 20000);
-    </script>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

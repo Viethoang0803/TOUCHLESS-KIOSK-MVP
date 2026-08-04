@@ -5,13 +5,5 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2018',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          react: ['react', 'react-dom'],
-          mediapipe: ['@mediapipe/tasks-vision'],
-        },
-      },
-    },
   },
 });

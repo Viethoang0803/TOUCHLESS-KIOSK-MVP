@@ -68,6 +68,24 @@ npm run build
 npm run preview
 ```
 
+## Deploy lên Netlify
+
+Project có sẵn `netlify.toml`:
+
+- **Build command:** `npm run build`
+- **Publish directory:** `dist`
+
+Sau khi import repo trên Netlify, deploy sẽ tự build ra JavaScript production. **Không** deploy thư mục gốc (source `.tsx`) — trình duyệt không chạy được file TypeScript trực tiếp.
+
+Kiểm tra deploy thành công: mở site → View Source → phải thấy `<script src="/assets/index-....js">`, **không** phải `/src/main.tsx`.
+
+### Test trên iPhone
+
+1. Public site trên Netlify (Make public)
+2. Mở URL HTTPS trên Safari
+3. Bấm **Bắt đầu** → cho phép Camera
+4. Giơ ngón trỏ để điều khiển
+
 ## Chạy unit test
 
 ```bash
