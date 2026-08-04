@@ -4,6 +4,14 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
-    target: ['es2020', 'safari14'],
+    target: 'es2018',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          mediapipe: ['@mediapipe/tasks-vision'],
+        },
+      },
+    },
   },
 });

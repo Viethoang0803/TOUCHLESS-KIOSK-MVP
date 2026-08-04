@@ -1,8 +1,3 @@
-import {
-  FilesetResolver,
-  HandLandmarker,
-  type HandLandmarkerResult,
-} from '@mediapipe/tasks-vision';
 import { TOUCHLESS_CONFIG } from '../config/touchless-config';
 import type { HandTrackingResult, NormalizedLandmark } from './vision-types';
 
@@ -16,12 +11,23 @@ export interface HandLandmarkerController {
   close(): void;
 }
 
+interface MediaPipeLandmarker {
+  detectForVideo(
+    video: HTMLVideoElement,
+    timestamp: number,
+  ): {
+    landmarks: { x: number; y: number; z: number }[][];
+    handedness: { categoryName?: string; score?: number }[][];
+  };
+  close(): void;
+}
+
 function mapLandmarks(landmarks: { x: number; y: number; z: number }[]): NormalizedLandmark[] {
   return landmarks.map((lm) => ({ x: lm.x, y: lm.y, z: lm.z }));
 }
 
 function parseResult(
-  result: HandLandmarkerResult,
+  result: ReturnType<MediaPipeLandmarker['detectForVideo']>,
   inferenceLatencyMs: number,
 ): HandTrackingResult | null {
   if (!result.landmarks.length) {
@@ -46,13 +52,14 @@ function parseResult(
 }
 
 export function createHandLandmarkerController(): HandLandmarkerController {
-  let landmarker: HandLandmarker | null = null;
+  let landmarker: MediaPipeLandmarker | null = null;
   let status: HandLandmarkerStatus = 'idle';
   let errorMessage: string | undefined;
 
-  async function createWithDelegate(delegate: 'GPU' | 'CPU'): Promise<HandLandmarker> {
-    const vision = await FilesetResolver.forVisionTasks(TOUCHLESS_CONFIG.wasmPath);
-    return HandLandmarker.createFromOptions(vision, {
+  async function createWithDelegate(delegate: 'GPU' | 'CPU'): Promise<MediaPipeLandmarker> {
+    const mp = await import('@mediapipe/tasks-vision');
+    const vision = await mp.FilesetResolver.forVisionTasks(TOUCHLESS_CONFIG.wasmPath);
+    return (await mp.HandLandmarker.createFromOptions(vision, {
       baseOptions: {
         modelAssetPath: TOUCHLESS_CONFIG.modelPath,
         delegate,
@@ -62,7 +69,7 @@ export function createHandLandmarkerController(): HandLandmarkerController {
       minHandDetectionConfidence: TOUCHLESS_CONFIG.minHandDetectionConfidence,
       minHandPresenceConfidence: TOUCHLESS_CONFIG.minHandPresenceConfidence,
       minTrackingConfidence: TOUCHLESS_CONFIG.minTrackingConfidence,
-    });
+    })) as MediaPipeLandmarker;
   }
 
   async function initialize(): Promise<void> {

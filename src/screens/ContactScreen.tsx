@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import QRCode from 'qrcode';
 import { TouchlessButton } from '../components/TouchlessButton';
 import styles from './ContactScreen.module.css';
 
@@ -19,7 +18,9 @@ export function ContactScreen({ onBack, onGoHome }: ContactScreenProps) {
   const [qrUrl, setQrUrl] = useState('');
 
   useEffect(() => {
-    void QRCode.toDataURL(CONTACT.qrData, { width: 280, margin: 2 }).then(setQrUrl);
+    void import('qrcode').then((QRCode) => {
+      void QRCode.toDataURL(CONTACT.qrData, { width: 280, margin: 2 }).then(setQrUrl);
+    });
   }, []);
 
   return (
