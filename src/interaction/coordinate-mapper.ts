@@ -1,3 +1,6 @@
+import type { YMappingProfile } from './y-mapping';
+import { applyYMapping } from './y-mapping';
+
 export interface ActiveRegion {
   minX: number;
   maxX: number;
@@ -37,14 +40,16 @@ export function mapToViewport(
   normalizedY: number,
   region: ActiveRegion,
   viewport: ViewportSize,
+  yMapping?: YMappingProfile,
 ): ScreenPoint {
   const clamped = clampToActiveRegion(normalizedX, normalizedY, region);
   const tX = (clamped.x - region.minX) / (region.maxX - region.minX);
   const tY = (clamped.y - region.minY) / (region.maxY - region.minY);
+  const mappedY = applyYMapping(tY, yMapping);
 
   return {
     x: tX * viewport.width,
-    y: tY * viewport.height,
+    y: mappedY * viewport.height,
   };
 }
 
@@ -53,7 +58,8 @@ export function mapLandmarkToScreen(
   landmarkY: number,
   region: ActiveRegion,
   viewport: ViewportSize,
+  yMapping?: YMappingProfile,
 ): ScreenPoint {
   const mirroredX = mirrorNormalizedX(landmarkX);
-  return mapToViewport(mirroredX, landmarkY, region, viewport);
+  return mapToViewport(mirroredX, landmarkY, region, viewport, yMapping);
 }

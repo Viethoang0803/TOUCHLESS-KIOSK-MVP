@@ -13,7 +13,7 @@ export function CatalogScreen({ onSelectProduct, onGoHome }: CatalogScreenProps)
       <header className={styles.header}>
         <h1>Danh mục sản phẩm</h1>
         <p className={styles.scrollHint}>
-          Đưa cursor xuống mép dưới màn hình để cuộn xem thêm sản phẩm
+          Cuộn: đưa cursor gần mép trên/dưới, hoặc dùng nút ▲/▼ bên phải
         </p>
         <TouchlessButton
           targetId="catalog-home"

@@ -1,43 +1,46 @@
-/** Auto-scroll page when cursor is near viewport edges (touchless navigation) */
+/** Auto-scroll when cursor is near viewport edges */
 export interface EdgeScrollConfig {
-  edgeZoneRatio: number;
+  topEdgeRatio: number;
+  bottomEdgeRatio: number;
   maxSpeedPx: number;
 }
 
 const DEFAULT: EdgeScrollConfig = {
-  edgeZoneRatio: 0.12,
+  topEdgeRatio: 0.12,
+  bottomEdgeRatio: 0.12,
   maxSpeedPx: 10,
 };
 
 export function applyEdgeScroll(
   cursorY: number,
   viewportHeight: number,
-  config: EdgeScrollConfig = DEFAULT,
+  config: Partial<EdgeScrollConfig> = {},
 ): void {
-  const edgeZone = viewportHeight * config.edgeZoneRatio;
+  const { topEdgeRatio, bottomEdgeRatio, maxSpeedPx } = { ...DEFAULT, ...config };
+  const topZone = viewportHeight * topEdgeRatio;
+  const bottomZone = viewportHeight * bottomEdgeRatio;
   const maxScroll = document.documentElement.scrollHeight - viewportHeight;
 
   if (maxScroll <= 0) return;
 
-  if (cursorY > viewportHeight - edgeZone) {
-    const t = (cursorY - (viewportHeight - edgeZone)) / edgeZone;
-    const speed = t * config.maxSpeedPx;
-    window.scrollBy({ top: speed, left: 0, behavior: 'auto' });
-  } else if (cursorY < edgeZone) {
-    const t = (edgeZone - cursorY) / edgeZone;
-    const speed = t * config.maxSpeedPx;
-    window.scrollBy({ top: -speed, left: 0, behavior: 'auto' });
+  if (cursorY > viewportHeight - bottomZone) {
+    const t = (cursorY - (viewportHeight - bottomZone)) / bottomZone;
+    window.scrollBy({ top: t * maxSpeedPx, left: 0, behavior: 'auto' });
+  } else if (cursorY < topZone) {
+    const t = (topZone - cursorY) / topZone;
+    window.scrollBy({ top: -t * maxSpeedPx, left: 0, behavior: 'auto' });
   }
 }
 
-/** Adjust hit-test Y for scroll position */
-export function getDocumentCursorY(viewportY: number): number {
-  return viewportY + window.scrollY;
+/** Scroll by fixed amount (used by scroll assist buttons) */
+export function scrollPageBy(deltaPx: number): void {
+  window.scrollBy({ top: deltaPx, left: 0, behavior: 'smooth' });
 }
 
-/** Hit test uses viewport coords; elementsFromPoint needs client coordinates */
-export function getClientCursorY(viewportY: number): number {
-  return viewportY;
+export function scrollPageUp(amountPx = 320): void {
+  scrollPageBy(-amountPx);
 }
 
-export { getClientCursorY as toClientY };
+export function scrollPageDown(amountPx = 320): void {
+  scrollPageBy(amountPx);
+}

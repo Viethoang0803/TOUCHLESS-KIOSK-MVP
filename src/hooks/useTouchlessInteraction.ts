@@ -3,7 +3,7 @@ import { InteractionEngine, type InteractionSnapshot } from '../interaction/inte
 import type { HandTrackingResult } from '../vision/vision-types';
 import { interactionLogger } from '../kiosk/logger';
 import { applyEdgeScroll } from '../interaction/edge-scroll';
-import { getDeviceInteractionOverrides } from '../config/device-config';
+import { getDeviceInteractionOverrides, getMobileEdgeScrollConfig } from '../config/device-config';
 import type { VirtualCursorHandle } from '../components/VirtualCursor';
 
 const EMPTY_SNAPSHOT: InteractionSnapshot = {
@@ -47,7 +47,7 @@ export function useTouchlessInteraction(
 
   useEffect(() => {
     const overrides = getDeviceInteractionOverrides();
-    const { inferenceEveryNFrames: _skip, ...engineOverrides } = overrides;
+    const { inferenceEveryNFrames: _skip, edgeScroll: _edge, ...engineOverrides } = overrides;
     const engine = new InteractionEngine(engineOverrides);
     engine.setOnSelect((targetId) => {
       interactionLogger.log('target_selected', { targetId });
@@ -77,10 +77,7 @@ export function useTouchlessInteraction(
       );
 
       if (result.visible && result.gesture === 'POINTING') {
-        applyEdgeScroll(result.cursorY, viewport.height, {
-          edgeZoneRatio: 0.14,
-          maxSpeedPx: 12,
-        });
+        applyEdgeScroll(result.cursorY, viewport.height, getMobileEdgeScrollConfig());
       }
 
       cursorRef.current?.update({

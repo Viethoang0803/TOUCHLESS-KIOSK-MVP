@@ -8,6 +8,7 @@ import { CursorSmoother } from './smoothing';
 import { DwellController } from './dwell-controller';
 import type { NormalizedLandmark } from '../vision/vision-types';
 import type { ActiveRegion } from './coordinate-mapper';
+import type { YMappingProfile } from './y-mapping';
 
 export type CursorVisualState = 'hidden' | 'normal' | 'hover' | 'dwell';
 
@@ -34,6 +35,7 @@ export interface InteractionEngineConfig {
   gestureEnterFrames: number;
   gestureExitFrames: number;
   handLostGracePeriodMs: number;
+  yMapping?: YMappingProfile;
 }
 
 export type SelectionCallback = (targetId: string) => void;
@@ -136,6 +138,7 @@ export class InteractionEngine {
       tip.y,
       this.config.activeRegion,
       viewport,
+      this.config.yMapping,
     );
 
     const smoothed =

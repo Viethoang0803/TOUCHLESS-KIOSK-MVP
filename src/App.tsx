@@ -15,6 +15,8 @@ import { ProductDetailScreen } from './screens/ProductDetailScreen';
 import { ContactScreen } from './screens/ContactScreen';
 import { TargetTestScreen } from './screens/TargetTestScreen';
 import { MobileStartGate } from './components/MobileStartGate';
+import { ScrollAssist } from './components/ScrollAssist';
+import { scrollPageDown, scrollPageUp } from './interaction/edge-scroll';
 import { playSelectionSound, flashTarget } from './utils/feedback';
 import styles from './App.module.css';
 
@@ -117,6 +119,8 @@ export default function App() {
         'contact-back': () =>
           selectedProductIdRef.current ? navigate('product') : navigate('catalog'),
         'contact-home': resetToIdle,
+        'scroll-up': () => scrollPageUp(),
+        'scroll-down': () => scrollPageDown(),
         'test-exit': () => {
           window.history.pushState({}, '', '/');
           navigate('idle');
@@ -278,6 +282,12 @@ export default function App() {
       )}
 
       {renderScreen()}
+
+      <ScrollAssist
+        visible={started && screen !== 'idle'}
+        onScrollUp={() => scrollPageUp()}
+        onScrollDown={() => scrollPageDown()}
+      />
 
       <VirtualCursor ref={cursorRef} />
 
